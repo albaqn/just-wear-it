@@ -1,0 +1,242 @@
+# Just Wear It
+### An AI-Powered Outfit Recommendation System
+**Alba Quintas Núñez · CPSC 4580 · Spring 2026**
+
+---
+
+## Motivation
+
+In the first class of the course, Professor Slade mentioned that he did not spend time deciding what to wear each day because he did not find it useful. In reality, people spend a lot of time thinking about what to wear. According to a 2016 poll conducted by Marks & Spencer, women spend an average of 17 minutes a day on this decision, while men dedicate 13 minutes daily. For women, this adds up to four full days a year, and for men, three.
+
+Just Wear It automates this decision. It focuses on prioritizing the goals one may have for an outfit. Once the user provides pictures of the clothes in their closet, the program matches them to create outfits they will like — and saves them between 13 and 17 minutes a day.
+
+---
+
+## What is this?
+
+Just Wear It is an automated decision system that chooses your daily outfit for you. You upload photos of your clothes, set your preferences for the day, and the program recommends a complete outfit with a full explanation of every decision it made. It takes into account all the factors I consider when choosing an outfit, letting the user set those parameters as goals for the decision.
+
+The system goes beyond existing apps like Pureple, Fits, and Alta, which only consider weather and your closet inventory. Pureple mentions that it "combines real-time weather data with your closet inventory to suggest ideal outfits for the day." The Fits app adds the event you might be attending. Alta claims personalized recommendations but, like Pureple, only considers clothes and weather.
+
+As a fashion lover, I can attest that many other factors must be considered. These metrics fluctuate from person to person, so without considering them all, we cannot provide a truly personalized suggestion. Pereira et al. (2022) highlight this issue, raising concerns about "personalized suggestions" on fashion websites — these tools do not place enough importance on customers' personality traits.
+
+Just Wear It models the full human outfit decision process: personal style, occasion, formality, color preferences, event themes, what you wore yesterday, comfort vs. style tradeoffs, and real-time weather.
+
+---
+
+## What is interesting and important about it
+
+**The recommendation decision is made entirely by a Python scoring algorithm. The Anthropic API is used only for two peripheral tasks: analyzing clothing photos (perception) and generating natural language explanations (narration). The decision of which outfit to recommend is never delegated to the API — it is not a black box.**
+
+What makes this system academically interesting:
+
+- **Multi-criteria decision system** — The recommender scores every wardrobe item against 11 weighted parameters — occasion, formality, personal style, comfort, boldness, weather, event theme, preferred colors, avoided colors, forbidden color combinations, and outfit repetition avoidance — while two additional parameters (style mood for today and layering preference) shape the explanation and outerwear inclusion respectively.
+- **More parameters than any commercial app** — goes beyond weather + inventory to include personal style, boldness, layering preference, event themes, color avoidance combinations, and outfit repetition avoidance.
+- **Theme-driven recommendation** — typing "garden party", "Audrey Hepburn", "polka dot party", or "The Great Gatsby" activates a matching system that directly scans item descriptions for theme words, giving matching items a score override.
+- **Fuzzy style matching** — related styles get partial credit (e.g. "romantic" counts towards "bohemian"), and style is inferred from item descriptions as well as tags.
+- **Fully explainable decisions** — every recommendation includes a natural language explanation grounded in the scoring breakdown, not generated independently.
+
+---
+
+## How to Run It
+
+### 1. Unzip the submission
+Extract the ZIP file and navigate into the folder:
+```bash
+cd just-wear-it
+```
+
+### 2. Test wardrobe (recommended)
+A folder called **`TEST_wardrobe`** is included in this submission. It contains the clothing photos used during development and testing of the program. To get started quickly:
+
+1. Run the program (step 5 below)
+2. Open `http://127.0.0.1:5000`
+3. Upload the photos from `TEST_wardrobe` using the "Add a clothing item" button
+4. Set your preferences and click **Get My Outfit**
+
+This lets you see the full system working immediately without needing to photograph your own clothes first.
+
+### 3. Install dependencies
+```bash
+pip3 install -r requirements.txt
+```
+
+### 4. API key
+The `.env` file containing the Anthropic API key is included in this submission. No setup needed — it is already in the project folder.
+
+### 5. Run the program
+```bash
+python3 main.py
+```
+
+### 6. Open the web interface
+Visit **http://127.0.0.1:5000** in your browser.
+
+---
+
+## How to Use It
+
+**Step 1 — Upload your wardrobe**
+Click "Add a clothing item" and select one or more photos. You can upload multiple photos at once — they queue and analyze one by one. The AI analyzes each photo and extracts: category (top, bottom, dress, shoes, outerwear), color, formality (1–10), style tags, pattern, and season.
+
+If the AI misclassifies something, hover over the item and click the **✎ edit button** to correct the category, color, formality, style tags, and description manually.
+
+**Step 2 — Set your preferences**
+- **General style** — select aesthetic tags (Classic, Bohemian, Minimalist, etc.)
+- **Style for today** — free text describing your mood ("something cozy but put-together")
+- **Occasion** — Office, Casual, Dinner, Event, Active, Travel
+- **Event theme** — any text: "garden party", "denim party", "Audrey Hepburn", "The Great Gatsby", "polka dot party". The system knows cultural references, movies, celebrities, and aesthetics.
+- **Comfort ↔ Style slider** — 0 = prioritize comfort, 100 = prioritize looking polished
+- **Casual ↔ Formal slider** — sets your target formality level
+- **Minimal ↔ Layered slider** — controls whether outerwear is added
+- **Conservative ↔ Bold slider** — 0 = solid neutrals win, 100 = prints and patterns win
+- **Weather sensitivity** — how much the current weather should influence the recommendation. Although this setting might feel unnecessary given that a lot of people will always dress according to the weather, it is true that sometimes, for special events, the user might prioritize style over being warm.
+- **Color preferences** — click colors to prefer or avoid. Add color combination pairs to never wear together.
+- **Worn yesterday** — mark items you wore yesterday. They are hard-excluded from today's recommendation.
+
+**Step 3 — Get your outfit**
+Click **Get My Outfit**. The system recommends a complete outfit with a natural language explanation of every decision.
+
+Click **Generate Alternative** to get a different recommendation that avoids the previously suggested items.
+
+---
+
+## System Architecture
+
+```
+main.py           → entry point, starts Flask server
+app.py            → Flask routes connecting frontend to backend
+wardrobe.py       → in-memory wardrobe storage (ClothingItem, Wardrobe)
+preferences.py    → user preferences data class (all slider/tag values)
+vision.py         → sends clothing photos to Claude vision API, parses results
+recommender.py    → THE CORE ALGORITHM — scores and selects outfits
+theme_analyzer.py → translates any theme text into a structured aesthetic profile
+weather.py        → fetches real weather from Open-Meteo API (free, no key needed)
+explainer.py      → generates natural language explanation of the recommendation
+templates/
+  index.html      → full web interface (HTML/CSS/JS)
+```
+
+---
+
+## How the Recommendation Algorithm Works
+
+The recommender is a multi-criteria scoring system. Every item in the wardrobe is scored independently, then the best combination is selected.
+
+### Item-level scoring
+
+Each item receives a composite score from these factors:
+
+| Factor | What it measures |
+|---|---|
+| **Occasion score** | How well the item's formality and style fit the chosen occasion (office, casual, dinner, etc.) |
+| **Formality score** | How close the item's formality is to the user's slider value |
+| **Style score** | Fuzzy match between user style tags and item style tags — related styles get partial credit |
+| **Comfort score** | Driven by Comfort↔Style slider. Reads description words: "stretch", "oversized" = comfort; "tailored", "fitted" = style |
+| **Boldness score** | Driven by Conservative↔Bold slider. Solid neutrals score high when conservative; prints and patterns score high when bold |
+| **Weather score** | Real temperature and conditions from Open-Meteo API. Cold → rewards outerwear and knits, penalizes sandals. Hot → rewards linen and sleeveless, penalizes wool coats. Rain → penalizes suede and white shoes |
+| **Theme score** | Three-layer matching: (1) direct word match between theme input and item description — highest priority; (2) theme profile keywords and item_words; (3) API-analyzed aesthetic profile |
+| **Color preference** | Bonus for preferred colors, penalty for avoided colors |
+
+### Theme matching (key feature)
+
+When a theme is set (e.g. "polka dot party"), the system:
+1. Tokenizes the raw input into meaningful words: {"polka", "dot"}
+2. Scans every item description directly for those words
+3. Items that match get a **500-point bonus per matching word** — this overrides all other scores
+4. Items matching the theme also bypass the formality filter (a casual polka dot top should appear for a "polka dot party" even if the occasion is "event")
+5. The Anthropic API also analyzes the theme to produce color palettes, keywords, and item_words for secondary matching
+
+### Outfit construction rules
+- A **dress** replaces top + bottom entirely — never combined
+- Exactly **one pair of shoes** per outfit
+- **Outerwear** is optional — only added if the Layered slider > 25 and it doesn't hurt the score
+- **Yesterday's items** are hard-excluded from the candidate pool before any scoring
+- **Forbidden color combinations** are filtered from candidates before scoring
+
+### Decision explanation
+
+After the outfit is selected, a second API call generates a natural language explanation describing why each piece was chosen, how it fits the preferences, and how it relates to the theme (if any). This satisfies the course requirement for explainable AI decisions. The explanation is grounded in the algorithm's actual score breakdown — it is not generated independently of the decision.
+
+---
+
+## How the Vision Analysis Works
+
+Each uploaded photo is sent to the Claude vision API with a structured prompt. The model identifies:
+- Category (by shape, not color or pattern)
+- Dominant color
+- Formality score 1–10
+- Style tags
+- Pattern type
+- Season suitability
+
+ Vision analysis is the most challenging component of this system.Vision analysis is the most challenging component of this system. Clothing recognition depends heavily on photo quality, lighting, and garment orientation — factors outside the program's control. To mitigate this, the system uses two strategies: first, if the initial analysis fails or returns an unrecognizable result, a simpler fallback prompt is tried automatically; second, a post-processing layer catches the most common misclassifications (e.g. a printed t-shirt labeled as "accessory" is overridden to "top" based on its description). However, the most reliable fix is the edit modal: hovering over any wardrobe item reveals a pencil icon that lets the user manually correct the category, color, formality, style tags, pattern, and description. These corrections feed directly into the scoring algorithm — a corrected item is immediately treated as accurately classified for all future recommendations. This is why the TEST_wardrobe folder is provided: the included photos represent a realistic sample of a real client's wardrobe — taken in varied lighting and conditions. Some items may be misclassified by the vision API and require manual correction via the edit modal, which is expected and demonstrates the system working as intended in a real-world scenario.
+
+---
+
+## How the Theme System Works
+
+The theme field accepts any text: Pinterest aesthetics, movies, TV shows, celebrities, historical eras, fictional characters, or descriptive words like "denim" or "floral".
+
+The system has offline profiles for common themes (garden party, old money, dark academia, The Great Gatsby, Audrey Hepburn, Succession, Euphoria, cottagecore, etc.) and uses the Anthropic API to analyze unfamiliar themes in real time.
+
+Each theme profile contains: typical colors, patterns, formality level, silhouettes, fabrics, style keywords, item_words (words expected in clothing descriptions), and an "avoid" list.
+
+---
+
+## External APIs Used
+
+| API | Purpose | Cost |
+|---|---|---|
+| Anthropic Claude (claude-haiku-4-5) | Vision analysis, theme analysis, explanation generation | ~$0.001 per item upload, ~$0.001 per recommendation |
+| Open-Meteo | Real-time weather data | Free, no API key required |
+
+---
+
+## Dependencies
+
+```
+flask==3.0.0
+anthropic==0.40.0
+Pillow==10.2.0
+colorthief==0.2.1
+python-dotenv==1.0.0
+requests==2.31.0
+```
+
+---
+
+## Use of AI
+
+In this project, I used Claude to create a more robust recommendation system, design the entire front end of the demo, and assist with the explanations in this document. First, I created pseudocode for the program's different .py files. Then, I used Claude to improve the program's efficacy.
+
+One example of this was the computer vision part of the program. Initially, I realized that, depending on the lighting and orientation of the uploaded pictures, the AI analysis would misidentify the type of clothing (bottom, top, outerwear, etc.) or the color or fabric. After attempting to fix this issue, I came up with the idea of allowing users to edit the descriptions of their wardrobe items. This way, users do not need to worry about taking pictures with the best lighting, and we can account for scenarios in which the API cannot identify denim and other fabrics. Initially, this impacted the recommendation system's score system because the program was not classifying some clothes correctly.
+
+Another feature that I improved with AI was the theme analyzer. Initially, I tried to use a Pinterest API to provide context about the theme selected by the user (e.g., color palette or style) for the recommender, as a person choosing an outfit might do. However, using their API required applying for developer access. Therefore, I decided to have the program use the Anthropic API to analyze themes in real time.
+
+Using AI to implement the weather feature was also very efficient. I did not know about the Open-Meteo API before starting the project. After creating some pseudocode and collaborating with Claude, I was able to access the user's live weather (if they allow the program to use their location) and incorporate it into the recommendations.
+
+---
+
+## Project Structure Notes
+
+- No database is used. All wardrobe data lives in memory for the session and resets when the server restarts.
+- Uploaded images are saved to an `uploads/` folder on disk.
+- The `.env` file containing the API key is not committed to GitHub (excluded by `.gitignore`) but is included in the ZIP submission.
+- The program is designed to run locally (`http://127.0.0.1:5000`) for demonstration purposes.
+
+---
+
+## References
+
+1. Pereira, A. M., Moura, J. A. B., Costa, E. D. B., Vieira, T., Landim, A. R. D. B., Bazaki, E., & Wanick, V. (2022). Customer models for artificial intelligence-based decision support in fashion online retail supply chains. *Decision Support Systems*. https://www.sciencedirect.com/science/article/pii/S0167923622000665
+2. Marks & Spencer (2016). Women spend an average of 17 minutes deciding what to wear daily. *Daily Mail*.
+3. Pureple. (n.d.). Outfit planner and wardrobe app. https://pureple.com/
+4. Fits App. (n.d.). AI-powered fashion styling app. https://www.fits-app.com/
+5. Alta Daily. (n.d.). Personalized outfit recommendations. https://altadaily.app/
+
+---
+
+## GitHub Repository
+
+https://github.com/albaqn/just-wear-it

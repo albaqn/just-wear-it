@@ -1,0 +1,1098 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Just Wear It</title>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;1,300;1,400&family=DM+Mono:wght@300;400&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{--cream:#F5EFE4;--warm-white:#FAF7F2;--ink:#1A1612;--muted:#8C7E6E;--blush:#E8D5C4;--sage:#A8B5A0;--terracotta:#C4734A;--border:rgba(26,22,18,0.12)}
+html{scroll-behavior:smooth}
+body{background:var(--cream);color:var(--ink);font-family:'DM Mono',monospace;font-weight:300;font-size:13px;min-height:100vh}
+nav{position:fixed;top:0;left:0;right:0;z-index:100;display:flex;align-items:center;justify-content:space-between;padding:20px 48px;background:rgba(245,239,228,0.95);backdrop-filter:blur(12px);border-bottom:1px solid var(--border)}
+.logo{font-family:'Cormorant Garamond',serif;font-style:italic;font-size:22px}.logo span{color:var(--terracotta)}
+nav ul{list-style:none;display:flex;gap:32px}
+nav ul li a{text-decoration:none;color:var(--muted);font-size:11px;letter-spacing:.12em;text-transform:uppercase;transition:color .2s}
+nav ul li a:hover{color:var(--ink)}
+.nav-cta{background:var(--ink);color:var(--cream);padding:9px 20px;border-radius:2px;letter-spacing:.1em;font-size:11px;text-transform:uppercase;cursor:pointer;border:none;font-family:'DM Mono',monospace;transition:background .2s}
+.nav-cta:hover{background:var(--terracotta)}
+.section{padding:100px 48px}
+.section-label{font-size:11px;letter-spacing:.18em;text-transform:uppercase;color:var(--muted);margin-bottom:48px;display:flex;align-items:center;gap:12px}
+.section-label::after{content:'';flex:1;max-width:60px;height:1px;background:var(--border)}
+h2{font-family:'Cormorant Garamond',serif;font-size:42px;font-weight:300;line-height:1.1;margin-bottom:16px}
+#hero{min-height:100vh;display:flex;align-items:center;justify-content:center;flex-direction:column;text-align:center;padding-top:80px}
+h1{font-family:'Cormorant Garamond',serif;font-size:clamp(56px,9vw,100px);font-weight:300;line-height:.92;letter-spacing:-.02em;margin-bottom:32px}
+h1 em{font-style:italic;color:var(--terracotta)}
+.hero-desc{color:var(--muted);line-height:1.8;max-width:440px;margin:0 auto 48px;font-size:12px}
+.hero-actions{display:flex;gap:16px;justify-content:center;flex-wrap:wrap}
+.btn-primary{background:var(--ink);color:var(--cream);border:none;padding:14px 32px;border-radius:2px;font-family:'DM Mono',monospace;font-size:11px;letter-spacing:.12em;text-transform:uppercase;cursor:pointer;transition:all .2s}
+.btn-primary:hover{background:var(--terracotta)}
+.btn-primary:disabled{opacity:.4;cursor:not-allowed;background:var(--ink)}
+.btn-ghost{background:transparent;color:var(--ink);border:1px solid var(--border);padding:14px 28px;border-radius:2px;font-family:'DM Mono',monospace;font-size:11px;letter-spacing:.12em;text-transform:uppercase;cursor:pointer;transition:all .2s}
+.btn-ghost:hover{border-color:var(--ink)}
+.btn-danger{background:transparent;color:#c0392b;border:1px solid rgba(192,57,43,.3);padding:8px 16px;border-radius:2px;font-family:'DM Mono',monospace;font-size:10px;letter-spacing:.1em;text-transform:uppercase;cursor:pointer;transition:all .2s}
+.btn-danger:hover{background:#c0392b;color:white}
+#closet{background:var(--blush)}
+.upload-grid{display:grid;grid-template-columns:1fr 1fr;gap:48px;align-items:start}
+.upload-zone{border:2px dashed var(--border);border-radius:4px;padding:48px 32px;text-align:center;cursor:pointer;transition:all .3s;background:rgba(255,255,255,.4)}
+.upload-zone:hover,.upload-zone.drag-over{border-color:var(--terracotta);background:rgba(255,255,255,.7)}
+.upload-zone h3{font-family:'Cormorant Garamond',serif;font-size:22px;margin-bottom:8px}
+.upload-zone p{color:var(--muted);font-size:11px;line-height:1.8}
+.upload-icon{font-size:36px;margin-bottom:16px}
+#fileInput{display:none}
+.upload-status{margin-top:12px;font-size:11px;color:var(--terracotta);min-height:16px}
+.wardrobe-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:10px}
+.wardrobe-item{position:relative;border-radius:3px;overflow:hidden;aspect-ratio:3/4;background:var(--cream);border:1px solid var(--border)}
+.wardrobe-item img{width:100%;height:100%;object-fit:cover}
+.wardrobe-item-info{position:absolute;bottom:0;left:0;right:0;background:rgba(250,247,242,.93);padding:6px 8px}
+.wardrobe-item-name{font-size:9px;text-transform:uppercase;letter-spacing:.08em;color:var(--ink);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.wardrobe-item-cat{font-size:9px;color:var(--muted)}
+.wardrobe-item-remove{position:absolute;top:5px;right:5px;background:rgba(26,22,18,.65);color:white;border:none;border-radius:50%;width:20px;height:20px;font-size:13px;cursor:pointer;display:none;align-items:center;justify-content:center}
+.wardrobe-item:hover .wardrobe-item-remove{display:flex}
+.wardrobe-item.worn-yesterday{opacity:.5}
+.wardrobe-item.worn-yesterday::after{content:'Yesterday';position:absolute;top:5px;left:5px;background:var(--terracotta);color:white;font-size:8px;padding:2px 6px;border-radius:2px}
+.wardrobe-empty{grid-column:1/-1;text-align:center;color:var(--muted);font-size:12px;padding:32px}
+.wardrobe-count{font-size:11px;color:var(--muted);margin-bottom:16px}
+#preferences{background:var(--warm-white)}
+.prefs-grid{display:grid;grid-template-columns:1fr 1fr;gap:2px}
+.pref-panel{background:var(--cream);padding:40px}
+.pref-panel h3{font-family:'Cormorant Garamond',serif;font-size:28px;font-weight:300;margin-bottom:6px}
+.pref-panel>p{color:var(--muted);font-size:11px;line-height:1.7;margin-bottom:20px}
+.pref-panel.full-width{grid-column:1/-1}
+.style-tags{display:flex;flex-wrap:wrap;gap:8px}
+.tag{padding:7px 16px;border:1px solid var(--border);border-radius:100px;font-size:11px;color:var(--muted);cursor:pointer;transition:all .2s;background:transparent;font-family:'DM Mono',monospace;letter-spacing:.05em}
+.tag:hover,.tag.active{background:var(--ink);color:var(--cream);border-color:var(--ink)}
+.text-input{width:100%;border:1px solid var(--border);border-radius:2px;padding:12px 16px;font-family:'DM Mono',monospace;font-size:12px;color:var(--ink);background:var(--warm-white);outline:none;transition:border-color .2s;margin-top:4px}
+.text-input:focus{border-color:var(--ink)}
+.text-input::placeholder{color:var(--muted)}
+.input-label{font-size:10px;letter-spacing:.12em;text-transform:uppercase;color:var(--muted);margin-bottom:6px;display:block}
+.occasion-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
+.occasion-btn{padding:12px 8px;border:1px solid var(--border);border-radius:2px;font-family:'DM Mono',monospace;font-size:10px;color:var(--muted);cursor:pointer;transition:all .2s;background:transparent;letter-spacing:.05em;display:flex;flex-direction:column;align-items:center;gap:6px}
+.occasion-btn:hover,.occasion-btn.active{background:var(--ink);color:var(--cream);border-color:var(--ink)}
+.occasion-icon{font-size:18px}
+.slider-group{display:flex;flex-direction:column;gap:18px}
+.slider-row{display:flex;flex-direction:column;gap:8px}
+.slider-label{display:flex;justify-content:space-between;font-size:11px;color:var(--muted)}
+.slider-label span:last-child{color:var(--ink)}
+input[type=range]{-webkit-appearance:none;appearance:none;width:100%;height:2px;background:linear-gradient(to right,var(--ink) 50%,var(--border) 50%);border-radius:0;outline:none;cursor:pointer}
+input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;appearance:none;width:14px;height:14px;background:var(--ink);border-radius:50%}
+.color-row{margin-bottom:16px}
+.color-row-label{font-size:10px;color:var(--muted);letter-spacing:.1em;text-transform:uppercase;margin-bottom:10px}
+.color-swatches{display:flex;gap:10px;flex-wrap:wrap}
+.swatch{width:32px;height:32px;border-radius:50%;cursor:pointer;border:3px solid transparent;transition:all .2s}
+.swatch.selected{border-color:var(--ink);transform:scale(1.15)}
+.swatch.avoided{opacity:.35}
+.swatch.avoided.selected{border-color:#c0392b;opacity:1}
+.yesterday-grid{display:grid;grid-template-columns:repeat(6,1fr);gap:8px;min-height:60px}
+.yesterday-thumb{aspect-ratio:3/4;border-radius:2px;overflow:hidden;cursor:pointer;border:2px solid transparent;transition:all .2s;position:relative;background:var(--blush)}
+.yesterday-thumb img{width:100%;height:100%;object-fit:cover}
+.yesterday-thumb.selected{border-color:var(--terracotta)}
+.yesterday-thumb.selected::after{content:'✓';position:absolute;top:3px;right:3px;background:var(--terracotta);color:white;font-size:9px;width:16px;height:16px;border-radius:50%;display:flex;align-items:center;justify-content:center}
+.yesterday-empty{grid-column:1/-1;font-size:11px;color:var(--muted);padding:16px 0}
+.recommend-area{background:var(--ink);padding:60px 48px;text-align:center}
+.recommend-area p{color:rgba(245,239,228,.5);font-size:12px;margin-bottom:24px}
+#recommendBtn{background:var(--terracotta);font-size:13px;padding:18px 48px;letter-spacing:.15em}
+#recommendBtn:hover:not(:disabled){background:#d4845c}
+#loading{display:none;text-align:center;padding:80px 48px;background:var(--ink)}
+.spinner{width:32px;height:32px;border:2px solid rgba(245,239,228,.2);border-top-color:var(--terracotta);border-radius:50%;animation:spin .8s linear infinite;margin:0 auto 16px}
+@keyframes spin{to{transform:rotate(360deg)}}
+#loading p{color:rgba(245,239,228,.5);font-size:12px}
+#result{background:var(--ink);color:var(--cream);display:none}
+.result-grid{display:grid;grid-template-columns:1fr 2fr;gap:48px;align-items:start}
+.result-items{display:flex;flex-direction:column;gap:10px}
+.result-item{background:rgba(245,239,228,.06);border:1px solid rgba(245,239,228,.12);padding:14px 16px;display:flex;align-items:center;gap:14px;border-radius:3px;transition:background .2s}
+.result-item:hover{background:rgba(245,239,228,.1)}
+.result-item-img{width:52px;height:52px;object-fit:cover;border-radius:2px;flex-shrink:0}
+.result-item-swatch{width:52px;height:52px;border-radius:2px;flex-shrink:0;display:none}
+.result-item-name{font-family:'Cormorant Garamond',serif;font-size:17px;margin-bottom:3px}
+.result-item-meta{font-size:10px;color:rgba(245,239,228,.45);letter-spacing:.06em}
+.result-score{font-size:10px;color:var(--sage);margin-top:16px;line-height:1.8;letter-spacing:.06em}
+.result-reasoning{background:rgba(245,239,228,.04);border:1px solid rgba(245,239,228,.1);border-radius:3px;padding:32px}
+.reasoning-head{font-family:'Cormorant Garamond',serif;font-style:italic;font-size:13px;color:rgba(245,239,228,.4);margin-bottom:16px}
+.reasoning-title{font-family:'Cormorant Garamond',serif;font-size:28px;font-weight:300;margin-bottom:16px;line-height:1.2}
+.reasoning-text{color:rgba(245,239,228,.7);line-height:1.9;font-size:12px;margin-bottom:20px}
+.reasoning-tags{display:flex;gap:8px;flex-wrap:wrap}
+.reasoning-tag{padding:5px 14px;border:1px solid rgba(245,239,228,.2);border-radius:100px;font-size:10px;color:rgba(245,239,228,.6);letter-spacing:.08em}
+.result-actions{display:flex;gap:12px;margin-top:24px;flex-wrap:wrap}
+.btn-alt{background:transparent;color:var(--cream);border:1px solid rgba(245,239,228,.3);padding:12px 24px;border-radius:2px;font-family:'DM Mono',monospace;font-size:11px;letter-spacing:.1em;text-transform:uppercase;cursor:pointer;transition:all .2s}
+.btn-alt:hover{border-color:var(--cream);background:rgba(245,239,228,.08)}
+.warning{background:rgba(196,115,74,.15);border:1px solid rgba(196,115,74,.4);border-radius:3px;padding:12px 16px;font-size:11px;color:var(--terracotta);margin-bottom:16px}
+.analyzing-badge{display:inline-block;background:var(--terracotta);color:white;font-size:9px;letter-spacing:.1em;text-transform:uppercase;padding:3px 8px;border-radius:2px;margin-left:6px;animation:pulse 1s infinite}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.4}}
+@media(max-width:768px){nav{padding:16px 24px}nav ul{display:none}.section{padding:60px 24px}.upload-grid,.prefs-grid,.result-grid{grid-template-columns:1fr}.recommend-area{padding:48px 24px}}
+ 
+.how-step{background:var(--cream);padding:48px 40px;transition:background .3s;cursor:default}
+.how-step.hovered{background:var(--ink)}
+.how-step.hovered .how-num,.how-step.hovered .how-title,.how-step.hovered .how-desc{color:var(--cream)}
+.how-step.hovered .how-icon{filter:grayscale(1) brightness(5)}
+.how-num{font-family:"Cormorant Garamond",serif;font-size:80px;font-weight:300;color:var(--border);line-height:1;margin-bottom:20px;transition:color .3s}
+.how-icon{font-size:28px;margin-bottom:20px;transition:filter .3s}
+.how-title{font-family:"Cormorant Garamond",serif;font-size:22px;font-weight:400;margin-bottom:12px;transition:color .3s}
+.how-desc{color:var(--muted);line-height:1.8;font-size:12px;transition:color .3s}
+.how-step.hovered .how-desc{color:rgba(245,239,228,.7)}
+@media(max-width:768px){.how-step{padding:36px 24px}#how .section+div{grid-template-columns:1fr}}
+ 
+.queue-item{display:flex;align-items:center;gap:10px;padding:8px 12px;background:rgba(255,255,255,.5);border-radius:2px;font-size:11px}
+.queue-item-name{flex:1;color:var(--ink);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.queue-item-status{font-size:10px;letter-spacing:.06em;flex-shrink:0}
+.queue-item.pending .queue-item-status{color:var(--muted)}
+.queue-item.analyzing .queue-item-status{color:var(--terracotta);animation:pulse 1s infinite}
+.queue-item.done .queue-item-status{color:var(--sage)}
+.queue-item.error .queue-item-status{color:#c0392b}
+.queue-progress{height:2px;background:var(--border);border-radius:0;margin-top:10px;overflow:hidden}
+.queue-progress-bar{height:100%;background:var(--terracotta);transition:width .3s;width:0}
+ 
+.pref-swatch{width:24px;height:24px;border-radius:50%;cursor:pointer;border:3px solid transparent;transition:all .2s}
+.pref-swatch:hover{transform:scale(1.15)}
+.pref-swatch.selected{border-color:var(--ink);transform:scale(1.18);box-shadow:0 0 0 2px var(--cream)}
+.avoid-swatch{width:24px;height:24px;border-radius:50%;cursor:pointer;border:3px solid transparent;transition:all .2s;opacity:.4}
+.avoid-swatch:hover{opacity:.7}
+.avoid-swatch.selected{border-color:#c0392b;opacity:1;transform:scale(1.1)}
+.combo-pair{display:flex;align-items:center;gap:8px;padding:8px 12px;background:rgba(0,0,0,.04);border-radius:3px}
+.combo-select{border:1px solid var(--border);background:var(--warm-white);font-family:"DM Mono",monospace;font-size:11px;padding:6px 10px;border-radius:2px;color:var(--ink);outline:none;cursor:pointer}
+.combo-select:focus{border-color:var(--ink)}
+.combo-remove{background:transparent;border:none;color:var(--muted);font-size:16px;cursor:pointer;padding:0 4px;line-height:1}
+.combo-remove:hover{color:#c0392b}
+ 
+.wardrobe-item-edit{position:absolute;top:5px;left:5px;background:rgba(26,22,18,.65);color:white;border:none;border-radius:50%;width:20px;height:20px;font-size:11px;cursor:pointer;display:none;align-items:center;justify-content:center;line-height:1}
+.wardrobe-item:hover .wardrobe-item-edit{display:flex}
+.wardrobe-item.edited .wardrobe-item-info{border-top:2px solid var(--terracotta)}
+ 
+/* Edit modal */
+.modal-overlay{position:fixed;inset:0;background:rgba(26,22,18,.6);z-index:200;display:flex;align-items:center;justify-content:center;padding:24px;backdrop-filter:blur(4px)}
+.modal-overlay.hidden{display:none}
+.modal{background:var(--warm-white);border-radius:4px;padding:40px;width:100%;max-width:480px;position:relative;max-height:90vh;overflow-y:auto}
+.modal h3{font-family:"Cormorant Garamond",serif;font-size:26px;font-weight:300;margin-bottom:6px}
+.modal-subtitle{font-size:11px;color:var(--muted);margin-bottom:28px;line-height:1.6}
+.modal-img{width:100%;max-height:200px;object-fit:contain;border-radius:3px;margin-bottom:24px;background:var(--cream);padding:8px}
+.modal-field{margin-bottom:18px}
+.modal-label{font-size:10px;letter-spacing:.12em;text-transform:uppercase;color:var(--muted);display:block;margin-bottom:6px}
+.modal-select,.modal-input{width:100%;border:1px solid var(--border);border-radius:2px;padding:10px 14px;font-family:"DM Mono",monospace;font-size:12px;color:var(--ink);background:var(--cream);outline:none;transition:border-color .2s}
+.modal-select:focus,.modal-input:focus{border-color:var(--ink)}
+.modal-formality{display:flex;align-items:center;gap:12px}
+.modal-formality input[type=range]{flex:1}
+.modal-formality span{font-size:12px;color:var(--ink);min-width:20px;text-align:right}
+.modal-actions{display:flex;gap:12px;margin-top:28px}
+.modal-save{background:var(--ink);color:var(--cream);border:none;padding:12px 28px;border-radius:2px;font-family:"DM Mono",monospace;font-size:11px;letter-spacing:.1em;text-transform:uppercase;cursor:pointer;transition:background .2s;flex:1}
+.modal-save:hover{background:var(--terracotta)}
+.modal-cancel{background:transparent;color:var(--ink);border:1px solid var(--border);padding:12px 20px;border-radius:2px;font-family:"DM Mono",monospace;font-size:11px;letter-spacing:.1em;text-transform:uppercase;cursor:pointer}
+.modal-cancel:hover{border-color:var(--ink)}
+.modal-close{position:absolute;top:16px;right:16px;background:none;border:none;font-size:20px;cursor:pointer;color:var(--muted);line-height:1}
+.modal-close:hover{color:var(--ink)}
+ 
+.weather-bar{display:flex;align-items:center;gap:10px;padding:12px 16px;background:rgba(245,239,228,.06);border:1px solid rgba(245,239,228,.1);border-radius:3px;margin-top:16px;font-size:11px;color:rgba(245,239,228,.6)}
+.weather-icon{font-size:18px}
+.weather-live-badge{font-size:9px;background:var(--sage);color:var(--ink);padding:2px 6px;border-radius:2px;letter-spacing:.06em;margin-left:6px}
+.location-status{font-size:10px;color:var(--muted);margin-top:6px;min-height:14px}
+</style>
+</head>
+<body>
+<nav>
+  <div class="logo">Just <span>Wear</span> It</div>
+  <ul>
+    <li><a href="#how">How It Works</a></li><li><a href="#closet">My Closet</a></li>
+    <li><a href="#preferences">Preferences</a></li>
+    <li><a href="#result">My Outfit</a></li>
+  </ul>
+  <button class="nav-cta" onclick="getRecommendation()">Get Dressed</button>
+</nav>
+ 
+<div id="hero" class="section">
+  <h1>Stop <em>deciding</em><br>what to wear.</h1>
+  <p class="hero-desc">Upload your clothes, set your goals for today, and get a personalized outfit recommendation with a full explanation of every decision.</p>
+  <div class="hero-actions">
+    <button class="btn-primary" onclick="document.getElementById('closet').scrollIntoView({behavior:'smooth'})">Upload My Closet</button>
+    <button class="btn-ghost" onclick="document.getElementById('preferences').scrollIntoView({behavior:'smooth'})">Set Preferences</button>
+  </div>
+</div>
+ 
+ 
+<div id="how" style="background:var(--warm-white)">
+  <div class="section" style="padding-bottom:0">
+    <div class="section-label">How It Works</div>
+  </div>
+  <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:2px;margin-top:0">
+ 
+    <div class="how-step" onmouseenter="this.classList.add('hovered')" onmouseleave="this.classList.remove('hovered')">
+      <div class="how-num">01</div>
+      <div class="how-icon">📸</div>
+      <div class="how-title">Upload Your Wardrobe</div>
+      <p class="how-desc">Photograph each piece in your closet. The AI catalogs category, color, formality, and style automatically — no manual tagging needed.</p>
+    </div>
+ 
+    <div class="how-step" onmouseenter="this.classList.add('hovered')" onmouseleave="this.classList.remove('hovered')">
+      <div class="how-num">02</div>
+      <div class="how-icon">🎛️</div>
+      <div class="how-title">Set Your Parameters</div>
+      <p class="how-desc">Tell us your style, the occasion, colors to avoid, how formal you want to look, your mood today — and what you wore yesterday.</p>
+    </div>
+ 
+    <div class="how-step" onmouseenter="this.classList.add('hovered')" onmouseleave="this.classList.remove('hovered')">
+      <div class="how-num">03</div>
+      <div class="how-icon">✨</div>
+      <div class="how-title">Get Dressed with Confidence</div>
+      <p class="how-desc">Receive a curated outfit with a full explanation of why each piece was chosen — and generate alternatives if you want more options.</p>
+    </div>
+ 
+  </div>
+</div>
+ 
+<div id="closet" class="section">
+  <div class="section-label">My Wardrobe</div>
+  <div class="upload-grid">
+    <div>
+      <div class="upload-zone" id="uploadZone" onclick="document.getElementById('fileInput').click()">
+        <div class="upload-icon">👗</div>
+        <h3>Add clothing items</h3>
+        <p>Select one or many photos at once.<br>They will be analyzed one by one automatically.<br><br><em>Click or drag and drop</em></p>
+        <div class="upload-status" id="uploadStatus"></div>
+      </div>
+      <input type="file" id="fileInput" accept="image/*" multiple>
+      <!-- Upload queue display -->
+      <div id="uploadQueue" style="margin-top:16px;display:none">
+        <div style="font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);margin-bottom:10px">Upload Queue</div>
+        <div id="queueList" style="display:flex;flex-direction:column;gap:6px"></div>
+      </div>
+    </div>
+    <div>
+      <h2>Your closet,<br><em>catalogued.</em></h2>
+      <p style="color:var(--muted);font-size:12px;line-height:1.8;margin-bottom:20px">Upload at least one top, one bottom, and one pair of shoes. Each photo is analyzed automatically.</p>
+      <div class="wardrobe-count" id="wardrobeCount">0 items uploaded</div>
+      <div class="wardrobe-grid" id="wardrobeGrid">
+        <div class="wardrobe-empty">No items yet — upload some clothes to get started.</div>
+      </div>
+      <div style="margin-top:16px"><button class="btn-danger" onclick="resetWardrobe()">Clear Wardrobe</button></div>
+    </div>
+  </div>
+</div>
+ 
+<div id="preferences" class="section">
+  <div class="section-label">Preferences</div>
+  <div class="prefs-grid">
+ 
+    <div class="pref-panel">
+      <h3>Your General Style</h3>
+      <p>Select the aesthetics that feel like you. Pick all that apply.</p>
+      <div class="style-tags" id="styleTags">
+        <button class="tag" data-style="minimalist">Minimalist</button>
+        <button class="tag" data-style="classic">Classic</button>
+        <button class="tag" data-style="bohemian">Bohemian</button>
+        <button class="tag" data-style="streetwear">Streetwear</button>
+        <button class="tag" data-style="preppy">Preppy</button>
+        <button class="tag" data-style="romantic">Romantic</button>
+        <button class="tag" data-style="edgy">Edgy</button>
+        <button class="tag" data-style="business">Business</button>
+        <button class="tag" data-style="athleisure">Athleisure</button>
+        <button class="tag" data-style="elegant">Elegant</button>
+      </div>
+      <div style="margin-top:24px">
+        <label class="input-label">What style are you looking for today?</label>
+        <input type="text" id="styleToday" class="text-input" placeholder="e.g. cozy but put-together, very polished, relaxed chic...">
+      </div>
+    </div>
+ 
+    <div class="pref-panel">
+      <h3>Today's Occasion</h3>
+      <p>What's on your agenda? We'll calibrate formality accordingly.</p>
+      <div class="occasion-grid">
+        <button class="occasion-btn active" data-occasion="office"><span class="occasion-icon">💼</span><span>Office</span></button>
+        <button class="occasion-btn" data-occasion="casual"><span class="occasion-icon">☕</span><span>Casual</span></button>
+        <button class="occasion-btn" data-occasion="dinner"><span class="occasion-icon">🍽️</span><span>Dinner</span></button>
+        <button class="occasion-btn" data-occasion="event"><span class="occasion-icon">🎉</span><span>Event</span></button>
+        <button class="occasion-btn" data-occasion="active"><span class="occasion-icon">🏃</span><span>Active</span></button>
+        <button class="occasion-btn" data-occasion="travel"><span class="occasion-icon">✈️</span><span>Travel</span></button>
+      </div>
+      <div style="margin-top:20px">
+        <label class="input-label">Event theme or inspiration (optional)</label>
+        <input type="text" id="eventTheme" class="text-input" placeholder="e.g. garden party, black tie, 70s night, coastal...">
+      </div>
+    </div>
+ 
+    <div class="pref-panel">
+      <h3>Comfort and Formality</h3>
+      <p>Dial in exactly how you want to feel today.</p>
+      <div class="slider-group">
+        <div class="slider-row">
+          <div class="slider-label"><span>Casual to Formal</span><span id="formalityVal">50%</span></div>
+          <input type="range" id="formality" min="0" max="100" value="50">
+        </div>
+        <div class="slider-row">
+          <div class="slider-label"><span>Comfort to Style</span><span id="comfortVal">50%</span></div>
+          <input type="range" id="comfort" min="0" max="100" value="50">
+        </div>
+        <div class="slider-row">
+          <div class="slider-label"><span>Minimal to Layered</span><span id="layeringVal">30%</span></div>
+          <input type="range" id="layering" min="0" max="100" value="30">
+        </div>
+        <div class="slider-row">
+          <div class="slider-label"><span>Conservative to Bold</span><span id="boldnessVal">40%</span></div>
+          <input type="range" id="boldness" min="0" max="100" value="40">
+        </div>
+        <div style="margin-top:8px;padding-top:16px;border-top:1px solid var(--border)">
+          <div class="slider-row">
+            <div class="slider-label"><span>Is weather a concern today?</span><span id="weatherVal">50%</span></div>
+            <input type="range" id="weatherSensitivity" min="0" max="100" value="50">
+          </div>
+          <p style="font-size:10px;color:var(--muted);margin-top:8px">0 = ignore weather entirely &nbsp;·&nbsp; 100 = weather is top priority</p>
+          <div class="location-status" id="locationStatus"></div>
+        </div>
+      </div>
+    </div>
+ 
+    <div class="pref-panel full-width">
+      <h3>Color Preferences</h3>
+      <p style="color:var(--muted);font-size:11px;line-height:1.7;margin-bottom:20px">Click to mark colors you want to wear today. In the avoid row, click colors to exclude them from recommendations.</p>
+ 
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:24px;margin-bottom:24px">
+        <div>
+          <div class="color-row-label" style="margin-bottom:10px">Preferred today</div>
+          <div class="color-swatches" style="gap:7px" id="preferredSwatches">
+          <div class="swatch pref-swatch" style="background:#1A1612" data-color="black" title="Black"></div>
+          <div class="swatch pref-swatch" style="background:#4A4A4A" data-color="charcoal" title="Charcoal"></div>
+          <div class="swatch pref-swatch" style="background:#9E9E9E" data-color="grey" title="Grey"></div>
+          <div class="swatch pref-swatch" style="background:#FFFFFF;border:1px solid #ccc" data-color="white" title="White"></div>
+          <div class="swatch pref-swatch" style="background:#F5EFE4;border:1px solid #ccc" data-color="cream" title="Cream"></div>
+          <div class="swatch pref-swatch" style="background:#C8B89A" data-color="beige" title="Beige"></div>
+          <div class="swatch pref-swatch" style="background:#D2B48C" data-color="tan" title="Tan"></div>
+          <div class="swatch pref-swatch" style="background:#D4C5B0" data-color="taupe" title="Taupe"></div>
+          <div class="swatch pref-swatch" style="background:#6B5B45" data-color="camel" title="Camel"></div>
+          <div class="swatch pref-swatch" style="background:#8B4513" data-color="brown" title="Brown"></div>
+          <div class="swatch pref-swatch" style="background:#795548" data-color="chocolate" title="Chocolate"></div>
+          <div class="swatch pref-swatch" style="background:#C4734A" data-color="terracotta" title="Terracotta"></div>
+          <div class="swatch pref-swatch" style="background:#B7410E" data-color="rust" title="Rust"></div>
+          <div class="swatch pref-swatch" style="background:#7A8C3C" data-color="olive" title="Olive"></div>
+          <div class="swatch pref-swatch" style="background:#C19A6B" data-color="khaki" title="Khaki"></div>
+          <div class="swatch pref-swatch" style="background:#800020" data-color="burgundy" title="Burgundy"></div>
+          <div class="swatch pref-swatch" style="background:#2C3E50" data-color="navy blue" title="Navy Blue"></div>
+          <div class="swatch pref-swatch" style="background:#3B6FB6" data-color="blue" title="Blue"></div>
+          <div class="swatch pref-swatch" style="background:#87CEEB" data-color="sky blue" title="Sky Blue"></div>
+          <div class="swatch pref-swatch" style="background:#1A237E" data-color="cobalt" title="Cobalt"></div>
+          <div class="swatch pref-swatch" style="background:#008080" data-color="teal" title="Teal"></div>
+          <div class="swatch pref-swatch" style="background:#A8B5A0" data-color="sage green" title="Sage Green"></div>
+          <div class="swatch pref-swatch" style="background:#27AE60" data-color="green" title="Green"></div>
+          <div class="swatch pref-swatch" style="background:#1B5E20" data-color="forest green" title="Forest Green"></div>
+          <div class="swatch pref-swatch" style="background:#C0392B" data-color="red" title="Red"></div>
+          <div class="swatch pref-swatch" style="background:#E67E22" data-color="orange" title="Orange"></div>
+          <div class="swatch pref-swatch" style="background:#F1C40F" data-color="yellow" title="Yellow"></div>
+          <div class="swatch pref-swatch" style="background:#E9967A" data-color="coral" title="Coral"></div>
+          <div class="swatch pref-swatch" style="background:#D4A017" data-color="gold" title="Gold"></div>
+          <div class="swatch pref-swatch" style="background:#E2B97E" data-color="mustard" title="Mustard"></div>
+          <div class="swatch pref-swatch" style="background:#FF6B6B" data-color="salmon" title="Salmon"></div>
+          <div class="swatch pref-swatch" style="background:#F8BBD0" data-color="blush" title="Blush"></div>
+          <div class="swatch pref-swatch" style="background:#E91E8C" data-color="pink" title="Pink"></div>
+          <div class="swatch pref-swatch" style="background:#FCE4EC" data-color="light pink" title="Light Pink"></div>
+          <div class="swatch pref-swatch" style="background:#8E44AD" data-color="purple" title="Purple"></div>
+          <div class="swatch pref-swatch" style="background:#DDA0DD" data-color="plum" title="Plum"></div>
+          <div class="swatch pref-swatch" style="background:#D7BDE2" data-color="lavender" title="Lavender"></div>
+          <div class="swatch pref-swatch" style="background:#F3E5F5" data-color="lilac" title="Lilac"></div>
+          <div class="swatch pref-swatch" style="background:#B2DFDB" data-color="mint" title="Mint"></div>
+          <div class="swatch pref-swatch" style="background:#B2EBF2" data-color="powder blue" title="Powder Blue"></div>
+          </div>
+        </div>
+        <div>
+          <div class="color-row-label" style="margin-bottom:10px">Avoid today — click to mark</div>
+          <div class="color-swatches" style="gap:7px" id="avoidSwatches">
+          <div class="swatch avoid-swatch" style="background:#1A1612" data-color="black" title="Black"></div>
+          <div class="swatch avoid-swatch" style="background:#4A4A4A" data-color="charcoal" title="Charcoal"></div>
+          <div class="swatch avoid-swatch" style="background:#9E9E9E" data-color="grey" title="Grey"></div>
+          <div class="swatch avoid-swatch" style="background:#FFFFFF;border:1px solid #ccc" data-color="white" title="White"></div>
+          <div class="swatch avoid-swatch" style="background:#F5EFE4;border:1px solid #ccc" data-color="cream" title="Cream"></div>
+          <div class="swatch avoid-swatch" style="background:#C8B89A" data-color="beige" title="Beige"></div>
+          <div class="swatch avoid-swatch" style="background:#D2B48C" data-color="tan" title="Tan"></div>
+          <div class="swatch avoid-swatch" style="background:#D4C5B0" data-color="taupe" title="Taupe"></div>
+          <div class="swatch avoid-swatch" style="background:#6B5B45" data-color="camel" title="Camel"></div>
+          <div class="swatch avoid-swatch" style="background:#8B4513" data-color="brown" title="Brown"></div>
+          <div class="swatch avoid-swatch" style="background:#795548" data-color="chocolate" title="Chocolate"></div>
+          <div class="swatch avoid-swatch" style="background:#C4734A" data-color="terracotta" title="Terracotta"></div>
+          <div class="swatch avoid-swatch" style="background:#B7410E" data-color="rust" title="Rust"></div>
+          <div class="swatch avoid-swatch" style="background:#7A8C3C" data-color="olive" title="Olive"></div>
+          <div class="swatch avoid-swatch" style="background:#C19A6B" data-color="khaki" title="Khaki"></div>
+          <div class="swatch avoid-swatch" style="background:#800020" data-color="burgundy" title="Burgundy"></div>
+          <div class="swatch avoid-swatch" style="background:#2C3E50" data-color="navy blue" title="Navy Blue"></div>
+          <div class="swatch avoid-swatch" style="background:#3B6FB6" data-color="blue" title="Blue"></div>
+          <div class="swatch avoid-swatch" style="background:#87CEEB" data-color="sky blue" title="Sky Blue"></div>
+          <div class="swatch avoid-swatch" style="background:#1A237E" data-color="cobalt" title="Cobalt"></div>
+          <div class="swatch avoid-swatch" style="background:#008080" data-color="teal" title="Teal"></div>
+          <div class="swatch avoid-swatch" style="background:#A8B5A0" data-color="sage green" title="Sage Green"></div>
+          <div class="swatch avoid-swatch" style="background:#27AE60" data-color="green" title="Green"></div>
+          <div class="swatch avoid-swatch" style="background:#1B5E20" data-color="forest green" title="Forest Green"></div>
+          <div class="swatch avoid-swatch" style="background:#C0392B" data-color="red" title="Red"></div>
+          <div class="swatch avoid-swatch" style="background:#E67E22" data-color="orange" title="Orange"></div>
+          <div class="swatch avoid-swatch" style="background:#F1C40F" data-color="yellow" title="Yellow"></div>
+          <div class="swatch avoid-swatch" style="background:#E9967A" data-color="coral" title="Coral"></div>
+          <div class="swatch avoid-swatch" style="background:#D4A017" data-color="gold" title="Gold"></div>
+          <div class="swatch avoid-swatch" style="background:#E2B97E" data-color="mustard" title="Mustard"></div>
+          <div class="swatch avoid-swatch" style="background:#FF6B6B" data-color="salmon" title="Salmon"></div>
+          <div class="swatch avoid-swatch" style="background:#F8BBD0" data-color="blush" title="Blush"></div>
+          <div class="swatch avoid-swatch" style="background:#E91E8C" data-color="pink" title="Pink"></div>
+          <div class="swatch avoid-swatch" style="background:#FCE4EC" data-color="light pink" title="Light Pink"></div>
+          <div class="swatch avoid-swatch" style="background:#8E44AD" data-color="purple" title="Purple"></div>
+          <div class="swatch avoid-swatch" style="background:#DDA0DD" data-color="plum" title="Plum"></div>
+          <div class="swatch avoid-swatch" style="background:#D7BDE2" data-color="lavender" title="Lavender"></div>
+          <div class="swatch avoid-swatch" style="background:#F3E5F5" data-color="lilac" title="Lilac"></div>
+          <div class="swatch avoid-swatch" style="background:#B2DFDB" data-color="mint" title="Mint"></div>
+          <div class="swatch avoid-swatch" style="background:#B2EBF2" data-color="powder blue" title="Powder Blue"></div>
+          </div>
+        </div>
+      </div>
+ 
+      <div style="padding-top:20px;border-top:1px solid var(--border)">
+        <div class="color-row-label" style="margin-bottom:6px">Color combinations to avoid</div>
+        <p style="font-size:11px;color:var(--muted);margin-bottom:12px">Add pairs of colors that should never appear together in your outfit.</p>
+        <div id="comboPairs" style="display:flex;flex-direction:column;gap:8px;margin-bottom:12px"></div>
+        <button onclick="addComboPair()" class="btn-ghost" style="font-size:10px;padding:8px 16px">+ Add color pair to avoid</button>
+      </div>
+    </div>
+ 
+    </div>
+ 
+    <div class="pref-panel full-width">
+      <h3>What did you wear yesterday?</h3>
+      <p>Select the items you wore yesterday — the recommender will deprioritize them so you don't repeat outfits.</p>
+      <div class="yesterday-grid" id="yesterdayGrid">
+        <div class="yesterday-empty">Upload clothes above and they will appear here.</div>
+      </div>
+    </div>
+ 
+  </div>
+</div>
+ 
+<div class="recommend-area">
+  <p>Upload at least one top, one bottom, and shoes — then hit the button.</p>
+  <button class="btn-primary" id="recommendBtn" onclick="getRecommendation()">Get My Outfit</button>
+</div>
+ 
+<div id="loading">
+  <div class="spinner"></div>
+  <p>Choosing your outfit...</p>
+</div>
+ 
+<div id="result" class="section">
+  <div class="section-label" style="color:rgba(245,239,228,.4)">Today's Outfit</div>
+  <div id="warnings"></div>
+  <div class="result-grid">
+    <div>
+      <div style="font-family:'Cormorant Garamond',serif;font-style:italic;font-size:13px;color:rgba(245,239,228,.4);margin-bottom:16px">— Selected pieces</div>
+      <div class="result-items" id="resultItems"></div>
+      <div class="result-score" id="resultScore"></div>
+      <div class="weather-bar" id="weatherBar" style="display:none"></div>
+      <div class="result-actions">
+        <button class="btn-alt" onclick="getAlternative()">Generate Alternative</button>
+        <button class="btn-alt" onclick="document.getElementById('preferences').scrollIntoView({behavior:'smooth'})">Change Preferences</button>
+      </div>
+    </div>
+    <div class="result-reasoning">
+      <div class="reasoning-head">— Why this outfit?</div>
+      <div class="reasoning-title" id="reasoningTitle"></div>
+      <p class="reasoning-text" id="reasoningText"></p>
+      <div class="reasoning-tags" id="reasoningTags"></div>
+    </div>
+  </div>
+</div>
+ 
+ 
+<!-- Edit Item Modal -->
+<div class="modal-overlay hidden" id="editModal">
+  <div class="modal">
+    <button class="modal-close" onclick="closeEditModal()">&times;</button>
+    <h3>Edit clothing item</h3>
+    <p class="modal-subtitle">Correct anything the AI got wrong. These changes affect how the item is scored and recommended.</p>
+    <img class="modal-img" id="editModalImg" src="" alt="">
+    <input type="hidden" id="editModalId">
+ 
+    <div class="modal-field">
+      <label class="modal-label">Description</label>
+      <input type="text" class="modal-input" id="editDesc" placeholder="e.g. white polka dot t-shirt">
+    </div>
+ 
+    <div class="modal-field">
+      <label class="modal-label">Category (type of clothing)</label>
+      <select class="modal-select" id="editCategory">
+        <option value="top">Top (shirt, blouse, sweater, hoodie, t-shirt...)</option>
+        <option value="bottom">Bottom (pants, jeans, skirt, shorts, leggings...)</option>
+        <option value="dress">Dress or jumpsuit</option>
+        <option value="outerwear">Outerwear (jacket, coat, blazer, cardigan...)</option>
+        <option value="shoes">Shoes (any footwear)</option>
+        <option value="accessory">Accessory (bag, belt, hat, scarf, jewelry...)</option>
+      </select>
+    </div>
+ 
+    <div class="modal-field">
+      <label class="modal-label">Color</label>
+      <select class="modal-select" id="editColor">
+        <option value="black">Black</option>
+        <option value="charcoal">Charcoal</option>
+        <option value="grey">Grey</option>
+        <option value="white">White</option>
+        <option value="cream">Cream</option>
+        <option value="beige">Beige</option>
+        <option value="tan">Tan</option>
+        <option value="taupe">Taupe</option>
+        <option value="camel">Camel</option>
+        <option value="brown">Brown</option>
+        <option value="chocolate">Chocolate</option>
+        <option value="terracotta">Terracotta</option>
+        <option value="rust">Rust</option>
+        <option value="olive">Olive</option>
+        <option value="khaki">Khaki</option>
+        <option value="burgundy">Burgundy</option>
+        <option value="navy blue">Navy Blue</option>
+        <option value="blue">Blue</option>
+        <option value="sky blue">Sky Blue</option>
+        <option value="cobalt">Cobalt</option>
+        <option value="teal">Teal</option>
+        <option value="sage green">Sage Green</option>
+        <option value="green">Green</option>
+        <option value="forest green">Forest Green</option>
+        <option value="red">Red</option>
+        <option value="orange">Orange</option>
+        <option value="yellow">Yellow</option>
+        <option value="coral">Coral</option>
+        <option value="gold">Gold</option>
+        <option value="mustard">Mustard</option>
+        <option value="salmon">Salmon</option>
+        <option value="blush">Blush</option>
+        <option value="pink">Pink</option>
+        <option value="light pink">Light Pink</option>
+        <option value="purple">Purple</option>
+        <option value="plum">Plum</option>
+        <option value="lavender">Lavender</option>
+        <option value="lilac">Lilac</option>
+        <option value="mint">Mint</option>
+        <option value="powder blue">Powder Blue</option>
+        <option value="mixed colors">Mixed / Multicolor</option>
+      </select>
+    </div>
+ 
+    <div class="modal-field">
+      <label class="modal-label">Pattern</label>
+      <select class="modal-select" id="editPattern">
+        <option value="solid">Solid (one color)</option>
+        <option value="stripes">Stripes</option>
+        <option value="plaid">Plaid / Check</option>
+        <option value="floral">Floral</option>
+        <option value="print">Print (polka dots, animal print, abstract...)</option>
+        <option value="other">Other</option>
+      </select>
+    </div>
+ 
+    <div class="modal-field">
+      <label class="modal-label">Formality &nbsp;<small style="font-size:9px;color:var(--muted)">(1 = gym clothes, 10 = black tie)</small></label>
+      <div class="modal-formality">
+        <input type="range" id="editFormality" min="1" max="10" value="5"
+          oninput="document.getElementById('editFormalityVal').textContent=this.value">
+        <span id="editFormalityVal">5</span>
+      </div>
+    </div>
+ 
+    <div class="modal-field">
+      <label class="modal-label">Style tags (hold Ctrl/Cmd to select multiple)</label>
+      <select class="modal-select" id="editStyles" multiple style="height:110px">
+        <option value="minimalist">Minimalist</option>
+        <option value="classic">Classic</option>
+        <option value="bohemian">Bohemian</option>
+        <option value="streetwear">Streetwear</option>
+        <option value="preppy">Preppy</option>
+        <option value="romantic">Romantic</option>
+        <option value="edgy">Edgy</option>
+        <option value="business">Business</option>
+        <option value="athleisure">Athleisure</option>
+        <option value="elegant">Elegant</option>
+      </select>
+    </div>
+ 
+    <div class="modal-actions">
+      <button class="modal-cancel" onclick="closeEditModal()">Cancel</button>
+      <button class="modal-save" onclick="saveItemEdit()">Save Changes</button>
+    </div>
+  </div>
+</div>
+<footer style="padding:32px 48px;border-top:1px solid var(--border);display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:16px">
+  <div style="font-family:'Cormorant Garamond',serif;font-style:italic;font-size:18px">Just <span style="color:var(--terracotta)">Wear</span> It</div>
+  <p style="font-size:11px;color:var(--muted)">Alba Quintas Nunez · CPSC 4580 · Spring 2026</p>
+</footer>
+ 
+<script>
+var lastOutfitIds=[];
+var wardrobeItems=[];
+var userLat=null;
+var userLon=null;
+ 
+function initSliders(){
+  [['formality','formalityVal'],['comfort','comfortVal'],['layering','layeringVal'],['boldness','boldnessVal'],['weatherSensitivity','weatherVal']].forEach(function(pair){
+    var el=document.getElementById(pair[0]);
+    var valEl=document.getElementById(pair[1]);
+    function update(){var v=el.value;el.style.background='linear-gradient(to right,var(--ink) '+v+'%,var(--border) '+v+'%)';valEl.textContent=v+'%';}
+    el.addEventListener('input',update);update();
+  });
+}
+ 
+document.querySelectorAll('.tag').forEach(function(t){t.addEventListener('click',function(){t.classList.toggle('active');});});
+document.querySelectorAll('.occasion-btn').forEach(function(btn){btn.addEventListener('click',function(){document.querySelectorAll('.occasion-btn').forEach(function(b){b.classList.remove('active');});btn.classList.add('active');});});
+// Color swatches — preferred
+document.querySelectorAll('.pref-swatch').forEach(function(sw){
+  sw.addEventListener('click',function(){sw.classList.toggle('selected');});
+});
+// Color swatches — avoid
+document.querySelectorAll('.avoid-swatch').forEach(function(sw){
+  sw.addEventListener('click',function(){sw.classList.toggle('selected');});
+});
+ 
+// ── COLOR COMBINATION PAIRS ───────────────────────────────────────────────
+var ALL_COLORS = [
+  {name:"black",hex:"#1A1612"},
+  {name:"charcoal",hex:"#4A4A4A"},
+  {name:"grey",hex:"#9E9E9E"},
+  {name:"white",hex:"#FFFFFF"},
+  {name:"cream",hex:"#F5EFE4"},
+  {name:"beige",hex:"#C8B89A"},
+  {name:"tan",hex:"#D2B48C"},
+  {name:"taupe",hex:"#D4C5B0"},
+  {name:"camel",hex:"#6B5B45"},
+  {name:"brown",hex:"#8B4513"},
+  {name:"chocolate",hex:"#795548"},
+  {name:"terracotta",hex:"#C4734A"},
+  {name:"rust",hex:"#B7410E"},
+  {name:"olive",hex:"#7A8C3C"},
+  {name:"khaki",hex:"#C19A6B"},
+  {name:"burgundy",hex:"#800020"},
+  {name:"navy blue",hex:"#2C3E50"},
+  {name:"blue",hex:"#3B6FB6"},
+  {name:"sky blue",hex:"#87CEEB"},
+  {name:"cobalt",hex:"#1A237E"},
+  {name:"teal",hex:"#008080"},
+  {name:"sage green",hex:"#A8B5A0"},
+  {name:"green",hex:"#27AE60"},
+  {name:"forest green",hex:"#1B5E20"},
+  {name:"red",hex:"#C0392B"},
+  {name:"orange",hex:"#E67E22"},
+  {name:"yellow",hex:"#F1C40F"},
+  {name:"coral",hex:"#E9967A"},
+  {name:"gold",hex:"#D4A017"},
+  {name:"mustard",hex:"#E2B97E"},
+  {name:"salmon",hex:"#FF6B6B"},
+  {name:"blush",hex:"#F8BBD0"},
+  {name:"pink",hex:"#E91E8C"},
+  {name:"light pink",hex:"#FCE4EC"},
+  {name:"purple",hex:"#8E44AD"},
+  {name:"plum",hex:"#DDA0DD"},
+  {name:"lavender",hex:"#D7BDE2"},
+  {name:"lilac",hex:"#F3E5F5"},
+  {name:"mint",hex:"#B2DFDB"},
+  {name:"powder blue",hex:"#B2EBF2"},
+];
+ 
+function colorOptions(){
+  return ALL_COLORS.map(function(c){return '<option value="'+c.name+'">'+c.name.charAt(0).toUpperCase()+c.name.slice(1)+'</option>';}).join('');
+}
+ 
+function addComboPair(){
+  var pairs=document.getElementById('comboPairs');
+  var id='combo-'+Date.now();
+  var div=document.createElement('div');
+  div.className='combo-pair';div.id=id;
+  div.innerHTML='<select class="combo-select combo-color-a">'+colorOptions()+'</select>'+
+    '<span style="font-size:11px;color:var(--muted)">+</span>'+
+    '<select class="combo-select combo-color-b">'+colorOptions()+'</select>'+
+    '<button class="combo-remove" onclick="document.getElementById(\''+id+'\').remove()" title="Remove">&times;</button>';
+  pairs.appendChild(div);
+}
+ 
+function getAvoidedCombos(){
+  var combos=[];
+  document.querySelectorAll('.combo-pair').forEach(function(pair){
+    var a=pair.querySelector('.combo-color-a').value;
+    var b=pair.querySelector('.combo-color-b').value;
+    if(a&&b&&a!==b) combos.push([a,b]);
+  });
+  return combos;
+}
+ 
+// ── UPLOAD QUEUE SYSTEM ──────────────────────────────────────────────────
+var uploadZone=document.getElementById('uploadZone');
+var fileInput=document.getElementById('fileInput');
+var uploadQueue=[];
+var isProcessingQueue=false;
+ 
+uploadZone.addEventListener('dragover',function(e){e.preventDefault();uploadZone.classList.add('drag-over');});
+uploadZone.addEventListener('dragleave',function(){uploadZone.classList.remove('drag-over');});
+uploadZone.addEventListener('drop',function(e){e.preventDefault();uploadZone.classList.remove('drag-over');enqueueFiles(e.dataTransfer.files);});
+fileInput.addEventListener('change',function(){enqueueFiles(fileInput.files);fileInput.value='';});
+ 
+function enqueueFiles(files){
+  var queueDiv=document.getElementById('uploadQueue');
+  var queueList=document.getElementById('queueList');
+  if(files.length===0)return;
+ 
+  // Show queue panel
+  queueDiv.style.display='block';
+ 
+  // Add each file to queue with a UI row
+  for(var i=0;i<files.length;i++){
+    var file=files[i];
+    var queueId='q-'+Date.now()+'-'+i;
+    uploadQueue.push({file:file,id:queueId});
+ 
+    var row=document.createElement('div');
+    row.className='queue-item pending';
+    row.id=queueId;
+    row.innerHTML='<span class="queue-item-name">'+file.name+'</span><span class="queue-item-status">Waiting...</span>';
+    queueList.appendChild(row);
+  }
+ 
+  // Add progress bar if not there
+  if(!document.getElementById('queueProgressBar')){
+    var pb=document.createElement('div');
+    pb.className='queue-progress';
+    pb.innerHTML='<div class="queue-progress-bar" id="queueProgressBar"></div>';
+    queueDiv.appendChild(pb);
+  }
+ 
+  // Start processing if not already running
+  if(!isProcessingQueue) processQueue();
+}
+ 
+async function processQueue(){
+  if(uploadQueue.length===0){
+    isProcessingQueue=false;
+    document.getElementById('uploadStatus').textContent='All done!';
+    setTimeout(function(){document.getElementById('uploadStatus').textContent='';},3000);
+    return;
+  }
+ 
+  isProcessingQueue=true;
+  var total=document.querySelectorAll('.queue-item').length;
+  var done=document.querySelectorAll('.queue-item.done, .queue-item.error').length;
+ 
+  var next=uploadQueue.shift();
+  var row=document.getElementById(next.id);
+ 
+  // Mark as analyzing
+  if(row){
+    row.className='queue-item analyzing';
+    row.querySelector('.queue-item-status').innerHTML='Analyzing... <span class="analyzing-badge">AI</span>';
+  }
+  document.getElementById('uploadStatus').innerHTML='Analyzing '+next.file.name+'...';
+ 
+  var fd=new FormData();
+  fd.append('file',next.file);
+ 
+  try{
+    var res=await fetch('/api/upload',{method:'POST',body:fd});
+    var data=await res.json();
+    if(!res.ok){
+      if(row){row.className='queue-item error';row.querySelector('.queue-item-status').textContent='Failed';}
+    } else {
+      if(row){row.className='queue-item done';row.querySelector('.queue-item-status').textContent='✓ '+data.description;}
+      wardrobeItems.push(data);
+      addItemToGrid(data);addItemToYesterday(data);updateWardrobeCount();
+    }
+  }catch(e){
+    if(row){row.className='queue-item error';row.querySelector('.queue-item-status').textContent='Error';}
+  }
+ 
+  // Update progress bar
+  var newDone=document.querySelectorAll('.queue-item.done, .queue-item.error').length;
+  var pct=Math.round((newDone/total)*100);
+  var bar=document.getElementById('queueProgressBar');
+  if(bar) bar.style.width=pct+'%';
+ 
+  // Continue with next item
+  await processQueue();
+}
+ 
+function buildItemHTML(item){
+  var id=item.id;
+  var desc=item.description||'';
+  var cat=item.category||'';
+  var col=item.color||'';
+  var src=item.image_path||'';
+  return '<img src="'+src+'" alt="'+desc+'" onerror="this.style.display=&quot;none&quot;">'
+    +'<div class="wardrobe-item-info">'
+      +'<div class="wardrobe-item-name">'+desc+'</div>'
+      +'<div class="wardrobe-item-cat">'+cat+' · '+col+'</div>'
+    +'</div>'
+    +'<button class="wardrobe-item-edit" onclick="openEditModal(&apos;'+id+'&apos;)" title="Edit">&#9998;</button>'
+    +'<button class="wardrobe-item-remove" onclick="removeItem(&apos;'+id+'&apos;,this)" title="Remove">&#215;</button>';
+}
+ 
+function addItemToGrid(item){
+  var grid=document.getElementById('wardrobeGrid');
+  var empty=grid.querySelector('.wardrobe-empty');if(empty)empty.remove();
+  var div=document.createElement('div');div.className='wardrobe-item';div.dataset.id=item.id;
+  div.dataset.item=JSON.stringify(item);
+  div.innerHTML=buildItemHTML(item);
+  grid.appendChild(div);
+}
+ 
+function updateItemInGrid(item){
+  var div=document.querySelector('.wardrobe-item[data-id="'+item.id+'"]');
+  if(!div)return;
+  div.dataset.item=JSON.stringify(item);
+  div.innerHTML=buildItemHTML(item);
+  div.classList.add('edited');
+  var yt=document.querySelector('.yesterday-thumb[data-id="'+item.id+'"]');
+  if(yt) yt.title=item.description;
+  wardrobeItems=wardrobeItems.map(function(w){return w.id===item.id?item:w;});
+}
+ 
+function addItemToYesterday(item){
+  var grid=document.getElementById('yesterdayGrid');
+  var empty=grid.querySelector('.yesterday-empty');if(empty)empty.remove();
+  var div=document.createElement('div');div.className='yesterday-thumb';div.dataset.id=item.id;div.title=item.description;
+  div.innerHTML='<img src="'+item.image_path+'" alt="'+item.description+'" onerror="this.style.background=\''+item.color_hex+'\'">';
+  div.addEventListener('click',function(){
+    div.classList.toggle('selected');
+    var wItem=document.querySelector('.wardrobe-item[data-id="'+item.id+'"]');
+    if(wItem)wItem.classList.toggle('worn-yesterday',div.classList.contains('selected'));
+  });
+  grid.appendChild(div);
+}
+ 
+async function removeItem(itemId,btn){
+  await fetch('/api/wardrobe/'+itemId,{method:'DELETE'});
+  btn.closest('.wardrobe-item').remove();
+  var yThumb=document.querySelector('.yesterday-thumb[data-id="'+itemId+'"]');
+  if(yThumb)yThumb.remove();
+  wardrobeItems=wardrobeItems.filter(function(i){return i.id!==itemId;});
+  updateWardrobeCount();
+  if(document.querySelectorAll('.wardrobe-item').length===0){
+    document.getElementById('wardrobeGrid').innerHTML='<div class="wardrobe-empty">No items yet.</div>';
+    document.getElementById('yesterdayGrid').innerHTML='<div class="yesterday-empty">Upload clothes above and they will appear here.</div>';
+  }
+}
+ 
+function updateWardrobeCount(){
+  var n=document.querySelectorAll('.wardrobe-item').length;
+  document.getElementById('wardrobeCount').textContent=n===1?'1 item uploaded':n+' items uploaded';
+}
+ 
+async function resetWardrobe(){
+  if(!confirm('Clear all items from the wardrobe?'))return;
+  await fetch('/api/reset',{method:'POST'});
+  document.getElementById('wardrobeGrid').innerHTML='<div class="wardrobe-empty">No items yet.</div>';
+  document.getElementById('yesterdayGrid').innerHTML='<div class="yesterday-empty">Upload clothes above and they will appear here.</div>';
+  wardrobeItems=[];updateWardrobeCount();
+  document.getElementById('result').style.display='none';
+}
+ 
+function collectPreferences(){
+  return{
+    styles:[...document.querySelectorAll('.tag.active')].map(function(t){return t.dataset.style;}),
+    style_today:document.getElementById('styleToday').value.trim(),
+    occasion:document.querySelector('.occasion-btn.active')?document.querySelector('.occasion-btn.active').dataset.occasion:'casual',
+    event_theme:document.getElementById('eventTheme').value.trim(),
+    formality:parseInt(document.getElementById('formality').value),
+    comfort_vs_style:parseInt(document.getElementById('comfort').value),
+    layering:parseInt(document.getElementById('layering').value),
+    boldness:parseInt(document.getElementById('boldness').value),
+    weather_sensitivity:parseInt(document.getElementById('weatherSensitivity').value),
+    preferred_colors:[...document.querySelectorAll('.pref-swatch.selected')].map(function(s){return s.dataset.color;}),
+    avoided_colors:[...document.querySelectorAll('.avoid-swatch.selected')].map(function(s){return s.dataset.color;}),
+    avoided_combos:getAvoidedCombos(),
+    worn_yesterday_ids:[...document.querySelectorAll('.yesterday-thumb.selected')].map(function(t){return t.dataset.id;})
+  };
+}
+ 
+async function getRecommendation(excludeIds){
+  excludeIds=excludeIds||[];
+  var loading=document.getElementById('loading');
+  var result=document.getElementById('result');
+  loading.style.display='block';result.style.display='none';
+  loading.scrollIntoView({behavior:'smooth'});
+  // Wait up to 2 seconds for location before giving up
+  await ensureLocation();
+  try{
+    var res=await fetch('/api/recommend',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({preferences:collectPreferences(),exclude_ids:excludeIds,lat:userLat,lon:userLon})});
+    var data=await res.json();
+    loading.style.display='none';
+    if(!res.ok){alert(data.error||'Could not generate recommendation.');return;}
+    lastOutfitIds=data.outfit.map(function(i){return i.id;});
+    renderResult(data);
+  }catch(e){loading.style.display='none';alert('Something went wrong: '+e.message);}
+}
+ 
+function getAlternative(){getRecommendation(lastOutfitIds);}
+ 
+function renderResult(data){
+  var resultDiv=document.getElementById('result');
+  resultDiv.style.display='block';
+  document.getElementById('warnings').innerHTML=(data.warnings||[]).map(function(w){return '<div class="warning">'+w+'</div>';}).join('');
+  document.getElementById('resultItems').innerHTML=data.outfit.map(function(item){
+    return '<div class="result-item"><img class="result-item-img" src="'+item.image_path+'" alt="'+item.description+'" onerror="this.style.display=\'none\';this.nextElementSibling.style.display=\'block\'"><div class="result-item-swatch" style="background:'+item.color_hex+'"></div><div><div class="result-item-name">'+item.description+'</div><div class="result-item-meta">'+item.category+' · '+item.color+' · formality '+item.formality+'/10</div></div></div>';
+  }).join('');
+  var s=data.score;
+  document.getElementById('resultScore').innerHTML='Overall: '+Math.round(s.total)+'/100 &nbsp;·&nbsp; Color: '+Math.round(s.color_score)+' &nbsp;·&nbsp; Style: '+Math.round(s.style_score)+' &nbsp;·&nbsp; Formality: '+Math.round(s.formality_score);
+ 
+  // Show weather bar if weather data is available
+  var weatherBarEl=document.getElementById('weatherBar');
+  if(data.weather && data.weather.summary){
+    var w=data.weather;
+    var icon=w.is_raining?'🌧️':w.is_cold?'🧥':w.is_hot?'☀️':w.is_windy?'💨':'🌤️';
+    var badge=w.source==='live'?'<span class="weather-live-badge">LIVE</span>':'';
+    weatherBarEl.innerHTML='<span class="weather-icon">'+icon+'</span><span>'+w.summary+badge+'</span>';
+    weatherBarEl.style.display='flex';
+  } else {
+    weatherBarEl.style.display='none';
+  }
+  var exp=data.explanation;
+  document.getElementById('reasoningTitle').textContent=exp.title||'Your outfit for today';
+  document.getElementById('reasoningText').textContent=exp.paragraph||'';
+  document.getElementById('reasoningTags').innerHTML=(exp.tags||[]).map(function(t){return '<span class="reasoning-tag">'+t+'</span>';}).join('');
+  resultDiv.scrollIntoView({behavior:'smooth'});
+}
+ 
+ 
+// ── EDIT MODAL ────────────────────────────────────────────────────────────
+function openEditModal(itemId){
+  var div=document.querySelector('.wardrobe-item[data-id="'+itemId+'"]');
+  if(!div)return;
+  var item=JSON.parse(div.dataset.item||'{}');
+ 
+  document.getElementById('editModalId').value=itemId;
+  document.getElementById('editModalImg').src=item.image_path||'';
+  document.getElementById('editDesc').value=item.description||'';
+  document.getElementById('editFormality').value=item.formality||5;
+  document.getElementById('editFormalityVal').textContent=item.formality||5;
+ 
+  // Set category
+  var catSel=document.getElementById('editCategory');
+  for(var i=0;i<catSel.options.length;i++){
+    catSel.options[i].selected=(catSel.options[i].value===item.category);
+  }
+ 
+  // Set color
+  var colSel=document.getElementById('editColor');
+  var matched=false;
+  for(var i=0;i<colSel.options.length;i++){
+    if(colSel.options[i].value===(item.color||'').toLowerCase()){
+      colSel.options[i].selected=true; matched=true;
+    } else {
+      colSel.options[i].selected=false;
+    }
+  }
+  if(!matched) colSel.value='mixed colors';
+ 
+  // Set pattern
+  var patSel=document.getElementById('editPattern');
+  for(var i=0;i<patSel.options.length;i++){
+    patSel.options[i].selected=(patSel.options[i].value===item.pattern);
+  }
+ 
+  // Set styles
+  var stylesSel=document.getElementById('editStyles');
+  var itemStyles=item.styles||[];
+  for(var i=0;i<stylesSel.options.length;i++){
+    stylesSel.options[i].selected=itemStyles.indexOf(stylesSel.options[i].value)>=0;
+  }
+ 
+  document.getElementById('editModal').classList.remove('hidden');
+  document.body.style.overflow='hidden';
+}
+ 
+function closeEditModal(){
+  document.getElementById('editModal').classList.add('hidden');
+  document.body.style.overflow='';
+}
+ 
+// Close on overlay click
+document.getElementById('editModal').addEventListener('click',function(e){
+  if(e.target===this) closeEditModal();
+});
+ 
+async function saveItemEdit(){
+  var itemId=document.getElementById('editModalId').value;
+  var stylesSel=document.getElementById('editStyles');
+  var selectedStyles=[];
+  for(var i=0;i<stylesSel.options.length;i++){
+    if(stylesSel.options[i].selected) selectedStyles.push(stylesSel.options[i].value);
+  }
+ 
+  var updates={
+    description: document.getElementById('editDesc').value.trim(),
+    category:    document.getElementById('editCategory').value,
+    color:       document.getElementById('editColor').value,
+    pattern:     document.getElementById('editPattern').value,
+    formality:   parseInt(document.getElementById('editFormality').value),
+    styles:      selectedStyles,
+    available:   true
+  };
+ 
+  try{
+    var res=await fetch('/api/wardrobe/'+itemId,{
+      method:'PATCH',
+      headers:{'Content-Type':'application/json'},
+      body:JSON.stringify(updates)
+    });
+    var updated=await res.json();
+    if(!res.ok){alert('Save failed: '+(updated.error||'unknown error'));return;}
+    updateItemInGrid(updated);
+    closeEditModal();
+  }catch(e){
+    alert('Save failed: '+e.message);
+  }
+}
+ 
+initSliders();
+ 
+// ── GEOLOCATION ──────────────────────────────────────────────────────────
+function requestLocation(){
+  if(!navigator.geolocation){return;}
+  var statusEl=document.getElementById('locationStatus');
+ 
+  // Try to restore cached location from previous visit (survives page refresh)
+  try {
+    var cached = sessionStorage.getItem('jwi_location');
+    if(cached){
+      var loc = JSON.parse(cached);
+      userLat = loc.lat; userLon = loc.lon;
+      if(statusEl) statusEl.textContent='Location ready.';
+      setTimeout(function(){if(statusEl)statusEl.textContent='';},2000);
+    }
+  } catch(e){}
+ 
+  // Always refresh the location in the background
+  if(statusEl && !userLat) statusEl.textContent='Getting your location for weather...';
+ 
+  navigator.geolocation.getCurrentPosition(
+    function(pos){
+      userLat = pos.coords.latitude;
+      userLon = pos.coords.longitude;
+      // Cache it for this session
+      try { sessionStorage.setItem('jwi_location', JSON.stringify({lat:userLat,lon:userLon})); } catch(e){}
+      if(statusEl) statusEl.textContent='Location ready — live weather enabled.';
+      setTimeout(function(){if(statusEl)statusEl.textContent='';},2000);
+    },
+    function(err){
+      if(statusEl){
+        statusEl.textContent = userLat
+          ? 'Using cached location.'
+          : 'Location unavailable — using seasonal estimate.';
+        setTimeout(function(){if(statusEl)statusEl.textContent='';},3000);
+      }
+    },
+    {timeout:10000, maximumAge:300000}  // accept cached GPS up to 5 min old
+  );
+}
+ 
+// Wait for location before sending recommendation if it hasn't arrived yet
+async function ensureLocation(){
+  if(userLat !== null) return;  // already have it
+  return new Promise(function(resolve){
+    var attempts = 0;
+    var check = setInterval(function(){
+      attempts++;
+      if(userLat !== null || attempts > 20){  // wait max 2 seconds
+        clearInterval(check);
+        resolve();
+      }
+    }, 100);
+  });
+}
+ 
+requestLocation();
+ 
+</script>
+</body>
+</html>
